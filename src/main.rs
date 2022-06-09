@@ -16,7 +16,7 @@ struct MyApp {
     password: String,
     password_length: i32,
     include_special_characters: bool,
-    use_different_letter_cases: bool,
+    use_upper_case: bool,
     use_numbers: bool,
     use_underlines: bool,
 }
@@ -27,7 +27,7 @@ impl Default for MyApp {
             password: "".to_string(),
             password_length: 20,
             include_special_characters: true,
-            use_different_letter_cases: true,
+            use_upper_case: true,
             use_numbers: true,
             use_underlines: true,
         }
@@ -49,7 +49,7 @@ impl eframe::App for MyApp {
                 egui::Checkbox::new(&mut self.include_special_characters, "Include special characters")
             );
             ui.add(
-                egui::Checkbox::new(&mut self.use_different_letter_cases, "Use different letter cases")
+                egui::Checkbox::new(&mut self.use_upper_case, "Use upper case letters")
             );
             ui.add(
                 egui::Checkbox::new(&mut self.use_numbers, "Include numbers")
@@ -60,7 +60,7 @@ impl eframe::App for MyApp {
 
             if ui.add(egui::Button::new("Generate password")).clicked() {
                 self.password = format!(
-                    "Generated password {}",
+                    "Generated password: {}",
                     generate_password(self)
                 )
             }
@@ -74,10 +74,27 @@ impl eframe::App for MyApp {
 
 fn generate_password(passwd_parameters: &mut MyApp) -> String {
     let mut password = String::new();
+
+    let mut allowed_characters = String::from("qwertyuiopasdfghjklzxcvbnm");
+
+    if passwd_parameters.include_special_characters {
+        allowed_characters += "!\"$#%'()*+`-./:;<=>?@[\\]^{|}~&";
+    }
+    if passwd_parameters.use_numbers {
+        allowed_characters += "1234567890";
+    }
+    if passwd_parameters.use_upper_case {
+        allowed_characters += "QWERTYUIOPASDFGHJKLZXCVBNM";
+    }
+    if passwd_parameters.use_underlines {
+        allowed_characters += "_";
+    }
+
     let mut rng = thread_rng();
     for _ in 0..passwd_parameters.password_length {
-        let rand_num = rng.gen_range(33..=126);
-        password.push(rand_num as u8 as char);
+        let rand_num = rng.gen_range(0..allowed_characters.len());
+
+        password.push(allowed_characters.as_bytes()[rand_num] as char);
     }
 
     password
