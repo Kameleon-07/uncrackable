@@ -6,7 +6,7 @@ Uncrackable is a simple tool to generate secure passwords. Password randomizatio
 * Password length
 * Usage of special characters
 * Usage of upper case letters
-And more.
+* And more.
 
 ## Motivation
 
