@@ -1,8 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window in Windows on release
 
-mod password;
 use eframe::egui;
-use password::PasswordParameters;
+use uncrackable;
 
 fn main() {
     let options = eframe::NativeOptions::default();
@@ -17,7 +16,7 @@ struct MyApp {
     password: String,
     password_length: i32,
     include_special_characters: bool,
-    use_upper_case: bool,
+    use_uppercase: bool,
     use_numbers: bool,
     use_underlines: bool,
 }
@@ -28,7 +27,7 @@ impl Default for MyApp {
             password: "".to_string(),
             password_length: 20,
             include_special_characters: true,
-            use_upper_case: true,
+            use_uppercase: true,
             use_numbers: true,
             use_underlines: true,
         }
@@ -50,7 +49,7 @@ impl eframe::App for MyApp {
                 egui::Checkbox::new(&mut self.include_special_characters, "Include special characters")
             );
             ui.add(
-                egui::Checkbox::new(&mut self.use_upper_case, "Use upper case letters")
+                egui::Checkbox::new(&mut self.use_uppercase, "Use upper case letters")
             );
             ui.add(
                 egui::Checkbox::new(&mut self.use_numbers, "Include numbers")
@@ -59,18 +58,30 @@ impl eframe::App for MyApp {
                 egui::Checkbox::new(&mut self.use_underlines, "Use underlines")
             );
 
-            let passwd_parameters = PasswordParameters::new(
-                self.password_length,
-                self.include_special_characters,
-                self.use_numbers,
-                self.use_upper_case,
-                self.use_underlines,
-            );
+            let mut password_builder = uncrackable::PasswordBuilder::new()
+                .set_length(self.password_length);
+
+            if self.include_special_characters {
+                password_builder = password_builder.include_special_characters();
+            }
+
+            if self.use_numbers {
+                password_builder = password_builder.use_numbers();
+            }
+
+            if self.use_uppercase {
+                password_builder = password_builder.use_uppercase();
+            }
+
+            if self.use_underlines {
+                password_builder = password_builder.use_underlines();
+            }
+
 
             if ui.add(egui::Button::new("Generate password")).clicked() {
                 self.password = format!(
                     "Generated password: {}",
-                    password::generate_password(passwd_parameters)
+                    password_builder.build()
                 )
             }
 
