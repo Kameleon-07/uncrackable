@@ -1,7 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window in Windows on release
 
 use eframe::egui;
-use uncrackable;
 
 fn main() {
     let options = eframe::NativeOptions::default();
